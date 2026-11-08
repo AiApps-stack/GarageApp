@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Garage Log</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0e6b6b">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{--bg:#eef1f0;--card:#fff;--ink:#17262b;--mute:#5d6f75;--line:#d3dbdb;--acc:#0e6b6b;--on:#fff;--bad:#b3261e;--badbg:#fbe4e2;--warn:#7a4f00;--warnbg:#fdf0cf;--nev:#e4e9e9;--rd:#101a1d;--rdink:#f2f5ee;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#0e1619;--card:#162226;--ink:#e6eeee;--mute:#93a5aa;--line:#28383d;--acc:#4cc3c3;--on:#06201f;--bad:#ff9a90;--badbg:#3a1a18;--warn:#f2c14e;--warnbg:#35290c;--nev:#1d2a2e;--rd:#070d0f}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#0e1619;--card:#162226;--ink:#e6eeee;--mute:#93a5aa;--line:#28383d;--acc:#4cc3c3;--on:#06201f;--bad:#ff9a90;--badbg:#3a1a18;--warn:#f2c14e;--warnbg:#35290c;--nev:#1d2a2e;--rd:#070d0f}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 "Bahnschrift","Avenir Next","Segoe UI",system-ui,sans-serif;font-variant-numeric:tabular-nums}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--card);z-index:10}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--card);border-bottom:1px solid var(--line);padding:10px 12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+header select{flex:1 1 100%}
+.odo{display:flex;align-items:baseline;gap:6px;background:var(--rd);color:var(--rdink);border-radius:6px;padding:4px 10px;box-shadow:inset 0 2px 6px #0008}
+.odo input{width:8ch;background:none;border:0;color:inherit;font:600 26px/1.1 ui-monospace,"Cascadia Mono",Consolas,monospace;letter-spacing:.08em;text-align:right;padding:0;min-height:0}
+.odo input:focus{outline:0}.odo span{font-size:13px;opacity:.7}
+#hs{color:var(--mute);font-size:12px;flex:1 1 90px}
+main{padding:12px 12px 96px;max-width:640px;margin:0 auto}
+nav{position:fixed;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(4,1fr);background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);z-index:9}
+nav button{background:none;border:0;border-top:3px solid transparent;border-radius:0;color:var(--mute);padding:12px 0;font-weight:600}
+nav button.on{color:var(--acc);border-top-color:var(--acc)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:12px}
+.card h3{margin:0 0 8px;font-size:17px}
+label{display:block;font-size:13px;color:var(--mute);margin-bottom:8px}
+input,select,button{font:inherit;min-height:44px;border-radius:8px}
+input,select{width:100%;border:1px solid var(--line);background:var(--bg);color:var(--ink);padding:6px 10px;display:block;margin-top:2px}
+button{background:var(--acc);color:var(--on);border:0;padding:8px 16px;font-weight:600;cursor:pointer}
+button.sec{background:none;color:var(--acc);border:1px solid var(--acc)}
+button.bad{background:none;color:var(--bad);border:1px solid var(--bad)}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.g3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px}
+.cr{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}
+.row{display:flex;gap:8px;justify-content:space-between;align-items:center;flex-wrap:wrap}
+.mute,small{color:var(--mute)}
+.chip{border-radius:99px;padding:2px 10px;font-size:13px;font-weight:700;background:var(--nev)}
+.st{border-left:6px solid var(--line)}
+.st.over{border-left-color:var(--bad)}.st.over .chip{background:var(--badbg);color:var(--bad)}
+.st.soon{border-left-color:var(--warn)}.st.soon .chip{background:var(--warnbg);color:var(--warn)}
+.st.ok{border-left-color:var(--acc)}
+.note{background:var(--warnbg);color:var(--warn);border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:14px}
+.empty{text-align:center;color:var(--mute);padding:48px 16px}
+.item{padding:10px 0;border-bottom:1px solid var(--line);cursor:pointer;display:flex;flex-direction:column}
+.item:last-child{border:0}
+.ln{display:flex;justify-content:space-between;gap:8px;padding:4px 0}.ln b{font-weight:600}
+.bar{position:sticky;bottom:64px;display:flex;gap:8px;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 12px}
+.ov{position:fixed;inset:0;background:#0009;display:flex;align-items:center;justify-content:center;padding:20px;z-index:30}
+.dlg{background:var(--card);border-radius:14px;padding:16px;max-width:380px;width:100%}
+.dlg .row{justify-content:flex-end;margin-top:12px}
+#t{position:fixed;left:50%;transform:translateX(-50%);bottom:84px;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:99px;z-index:40;font-size:14px;max-width:90vw}
+.chk{display:flex;align-items:center;gap:8px;margin:0;color:var(--ink)}.chk input{width:22px;min-height:22px;margin:0}
+</style>
+</head>
+<body>
+<header>
+<select id="hv" aria-label="Vehicle"></select>
+<div class="odo"><input id="ho" inputmode="numeric" aria-label="Current odometer"><span id="hun">mi</span></div>
+<button id="hu" class="sec">Update</button><small id="hs"></small>
+</header>
+<main id="m"></main>
+<nav>
+<button data-tab="due">Due</button><button data-tab="log">Log service</button><button data-tab="hist">History</button><button data-tab="garage">Garage</button>
+</nav>
+<div id="t" hidden></div>
+<input type="file" id="rf" accept=".json,application/json" hidden>
+<script>
+(()=>{
+const KEY="garagelog.v1";
+const DEF=[["Oil & Filter Change",5000,6],["Tire Rotation",7500,6],["Brakes"],["Engine Air Filter",15000,12],["Cabin Air Filter",15000,12],["Transmission Fluid",60000,48],["Coolant",50000,60],["Brake Fluid",null,24],["Spark Plugs",60000],["Battery"],["Tires"],["Alignment",null,12],["Inspection / Registration",null,12],["Repair"],["Other"]];
+const FIELDS=[["nick","Nickname"],["year","Year *"],["make","Make *"],["model","Model *"],["trim","Trim"],["engine","Engine"],["trans","Transmission"],["drive","Drivetrain"],["vin","VIN"],["plate","Plate"],["pdate","Purchase date"],["po","Purchase odometer"],["notes","Notes"]];
+let S,DL=null,tab="due",D,H={q:"",cat:"",from:"",to:"",all:false},G={id:null,f:{}},C={id:null,name:"",mi:"",mo:""};
+const KMDEF={"Oil & Filter Change":10000,"Tire Rotation":10000,"Engine Air Filter":25000,"Cabin Air Filter":25000,"Transmission Fluid":100000,"Coolant":80000,"Spark Plugs":100000};
+const guessU=()=>{try{const r=((navigator.language||"").split("-")[1]||"").toUpperCase();return r&&!["US","GB","LR","MM"].includes(r)?"km":"mi"}catch(e){return"mi"}};
+const fresh=()=>{const u=guessU();return{u,v:[],c:DEF.map((d,i)=>({id:i+1,name:d[0],mi:d[1]?(u==="km"?KMDEF[d[0]]:d[1]):null,mo:d[2]||null})),s:[],cur:null,n:100}};
+try{const r=localStorage.getItem(KEY);S=r?JSON.parse(r):fresh()}catch(e){S=fresh()}
+if(!S.u)S.u="mi";
+const $=s=>document.querySelector(s);
+const E=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const pad=n=>String(n).padStart(2,"0");
+const iso=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const today=()=>iso(new Date());
+const pd=s=>{const[a,b,c]=s.split("-").map(Number);return new Date(a,b-1,c)};
+const addM=(s,n)=>{const d=pd(s);let m=d.getMonth()+n;const y=d.getFullYear()+Math.floor(m/12);m=((m%12)+12)%12;return iso(new Date(y,m,Math.min(d.getDate(),new Date(y,m+1,0).getDate())))};
+const days=(a,b)=>Math.round((pd(a)-pd(b))/864e5);
+const N=n=>n==null||n===""?"":Number(n).toLocaleString("en-US");
+const $$=n=>"$"+Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+const money=s=>{s=String(s||"").replace(/[$,\s]/g,"");if(!s)return 0;const x=parseFloat(s);if(isNaN(x))throw 0;return Math.round(x*100)/100};
+const cmp=(a,b)=>b.date.localeCompare(a.date)||b.odo-a.odo;
+const uid=()=>S.n++;
+const U=()=>S.u||"mi",UL=()=>U()==="km"?"kilometers":"miles",SOON=()=>U()==="km"?800:500;
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast("Storage is blocked here. Entries won’t survive a reload.")}};
+let tt;function toast(m){const t=$("#t");t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,2800)}
+function ask(msg,yes="Continue",alt){return new Promise(r=>{const o=document.createElement("div");o.className="ov";o.innerHTML='<div class="dlg"><p>'+E(msg).replace(/\n/g,"<br>")+'</p><div class="row"><button class="sec" id="n">Cancel</button>'+(alt?'<button class="sec" id="a">'+E(alt)+'</button>':"")+'<button id="y">'+E(yes)+'</button></div></div>';document.body.append(o);o.querySelector("#n").onclick=()=>{o.remove();r(false)};const a=o.querySelector("#a");if(a)a.onclick=()=>{o.remove();r("alt")};o.querySelector("#y").onclick=()=>{o.remove();r(true)}})}
+const V=()=>S.v.find(x=>x.id===S.cur)||S.v[0];
+const vlabel=v=>[v.year,v.make,v.model,v.trim].filter(Boolean).join(" ")+(v.nick?" ("+v.nick+")":"");
+const cname=id=>(S.c.find(c=>c.id===id)||{}).name||"Unknown";
+const empty=m=>'<div class="empty">'+m+'</div>';
+
+function odoInfo(v){if(!v)return[null,""];const c=[],sv=S.s.filter(x=>x.vid===v.id).sort(cmp)[0];
+if(v.co!=null)c.push([v.cd||"",1,v.co,"manual update"]);if(sv)c.push([sv.date,0,sv.odo,"last service"]);
+if(c.length){c.sort((a,b)=>b[0].localeCompare(a[0])||b[1]-a[1]);const x=c[0];return[x[2],x[3]+(x[0]?", "+x[0]:"")]}
+return v.po!=null?[v.po,"purchase odometer"]:[null,""]}
+
+function dueRows(v){const cur=odoInfo(v)[0],t=today(),out=[];
+for(const c of S.c){if(!c.mi&&!c.mo)continue;
+const l=S.s.filter(s=>s.vid===v.id&&s.items.some(i=>i.c===c.id)).sort(cmp)[0];
+if(!l){out.push({c,st:"never",r:3});continue}
+const dm=c.mi?l.odo+c.mi:null,dd=c.mo?addM(l.date,c.mo):null,ml=dm!=null&&cur!=null?dm-cur:null,dl=dd?days(dd,t):null;
+const od=(ml!=null&&ml<=0)||(dl!=null&&dl<=0),so=(ml!=null&&ml<=SOON())||(dl!=null&&dl<=30);
+out.push({c,l,dm,dd,st:od?"over":so?"soon":"ok",r:od?0:so?1:2,rem:[ml!=null?N(ml)+" "+U():"",dl!=null?dl+" days":""].filter(Boolean).join(" / ")})}
+return out.sort((a,b)=>a.r-b.r||a.c.name.localeCompare(b.c.name))}
+
+function odoWarn(vid,d,odo,ex){const w=[],ss=S.s.filter(x=>x.vid===vid&&x.id!==ex);
+const p=ss.filter(x=>x.date<=d).sort(cmp)[0],n=ss.filter(x=>x.date>d).sort((a,b)=>a.date.localeCompare(b.date)||a.odo-b.odo)[0];
+if(p&&odo<p.odo)w.push("On "+p.date+" you logged "+N(p.odo)+" "+U()+". "+N(odo)+" is lower, but later.");
+if(n&&odo>n.odo)w.push("On "+n.date+" you logged "+N(n.odo)+" "+U()+". "+N(odo)+" is higher, but earlier.");
+const v=S.v.find(x=>x.id===vid);if(v&&v.po!=null&&odo<v.po)w.push("Lower than the purchase odometer ("+N(v.po)+").");return w}
+
+/* ---------- views ---------- */
+const STL={over:"Overdue",soon:"Due soon",ok:"OK",never:"Never logged"};
+function vDue(){const v=V();if(!v)return empty("No vehicles yet. Add one in the Garage tab.");let h="";
+for(const x of S.v){if(x.id===v.id)continue;const r=dueRows(x).filter(q=>q.st==="over"||q.st==="soon");
+if(r.length)h+='<div class="note">'+E(vlabel(x))+": "+r.filter(q=>q.st==="over").length+" overdue, "+r.filter(q=>q.st==="soon").length+" due soon</div>"}
+const rows=dueRows(v);if(!rows.length)return h+empty("Set intervals on categories (Garage tab) to see what’s due.");
+return h+rows.map(r=>'<div class="card st '+r.st+'"><div class="row"><b>'+E(r.c.name)+'</b><span class="chip">'+STL[r.st]+"</span></div>"+
+(r.l?'<div class="mute">Last done '+r.l.date+" at "+N(r.l.odo)+" "+U()+"</div><div>Due "+[r.dm!=null?"at "+N(r.dm)+" "+U():"",r.dd?"by "+r.dd:""].filter(Boolean).join(" or ")+'</div><div class="mute">Remaining: '+r.rem+"</div>":'<div class="mute">Log it once to start tracking.</div>')+"</div>").join("")}
+
+function resetLog(){const v=V(),o=odoInfo(v)[0];D={date:today(),odo:o!=null?String(o):"",by:"",notes:"",lines:[],cat:"",desc:"",part:"",pc:"",lc:"",edit:null,nc:false,ncn:"",ncmi:"",ncmo:""}}
+function vLog(){if(!V())return empty("Add a vehicle in the Garage tab first.");
+const cats=S.c.slice().sort((a,b)=>a.name.localeCompare(b.name));let tot=0;
+const ls=D.lines.map((l,i)=>{const t=l.pc+l.lc;tot+=t;return '<div class="ln"><span><b>'+E(cname(l.c))+"</b> "+E(l.desc)+"<br><small>"+E(l.part)+'</small></span><span>'+$$(t)+' <button class="bad" data-act="rmline" data-i="'+i+'" aria-label="Remove line">×</button></span></div>'}).join("");
+return (D.edit?'<div class="note">Editing the entry from '+D.date+". Save to apply changes.</div>":"")+
+'<div class="card"><div class="g2"><label>Date<input type="date" data-k="date" value="'+D.date+'"></label><label>Odometer<input inputmode="numeric" data-k="odo" value="'+E(D.odo)+'"></label></div>'+
+'<label>Done by<input data-k="by" placeholder="DIY or shop name" value="'+E(D.by)+'"></label><label>Notes<input data-k="notes" value="'+E(D.notes)+'"></label></div>'+
+'<div class="card"><h3>Line items</h3>'+ls+
+'<div class="cr"><label>Category<select data-k="cat"><option value="">Choose…</option>'+cats.map(c=>'<option value="'+c.id+'"'+(String(c.id)===D.cat?" selected":"")+">"+E(c.name)+"</option>").join("")+'</select></label><button class="sec" data-act="newcat" style="margin-bottom:8px">+ New</button></div>'+
+(D.nc?'<div class="card"><label>New category name<input data-k="ncn" value="'+E(D.ncn)+'"></label><div class="g2"><label>Every ('+UL()+')<input inputmode="numeric" data-k="ncmi" value="'+E(D.ncmi)+'"></label><label>Every (months)<input inputmode="numeric" data-k="ncmo" value="'+E(D.ncmo)+'"></label></div><button data-act="addcat">Add category</button></div>':"")+
+'<label>Description<input data-k="desc" value="'+E(D.desc)+'"></label><label>Part / brand / number / spec<input data-k="part" value="'+E(D.part)+'"></label>'+
+'<div class="g2"><label>Parts $<input inputmode="decimal" data-k="pc" value="'+E(D.pc)+'"></label><label>Labor $<input inputmode="decimal" data-k="lc" value="'+E(D.lc)+'"></label></div><button class="sec" data-act="addline">Add line</button></div>'+
+'<div class="bar"><b>'+$$(tot)+'</b><span><button class="sec" data-act="clearlog">Clear</button> <button data-act="savelog">Save entry</button></span></div>'}
+
+function vHist(){if(!S.v.length)return empty("Nothing logged yet.");
+return '<div class="card"><label>Search<input data-h="q" value="'+E(H.q)+'" placeholder="Oil, brand, shop, notes…"></label><div class="g2"><label>Category<select data-h="cat"><option value="">All</option>'+S.c.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(c=>'<option value="'+c.id+'"'+(String(c.id)===H.cat?" selected":"")+">"+E(c.name)+"</option>").join("")+'</select></label><label class="chk" style="padding-top:20px"><input type="checkbox" data-h="all"'+(H.all?" checked":"")+"> All vehicles</label></div>"+
+'<div class="g2"><label>From<input type="date" data-h="from" value="'+H.from+'"></label><label>To<input type="date" data-h="to" value="'+H.to+'"></label></div></div><div id="hl"></div>'}
+function hrows(){const ws=H.q.toLowerCase().split(/\s+/).filter(Boolean),out=[];
+for(const s of S.s){if(!H.all&&s.vid!==V().id)continue;if(H.from&&s.date<H.from)continue;if(H.to&&s.date>H.to)continue;
+const items=s.items.filter(i=>{if(H.cat&&String(i.c)!==H.cat)return false;const hay=[cname(i.c),i.desc,i.part,s.by,s.notes].join(" ").toLowerCase();return ws.every(w=>hay.includes(w))});
+if(items.length)out.push({s,items})}return out.sort((a,b)=>cmp(a.s,b.s))}
+function fillHist(){const el=$("#hl");if(!el)return;const rows=hrows();let p=0,l=0,n=0;
+const body=rows.map(({s,items})=>{const v=S.v.find(x=>x.id===s.vid);
+return '<div class="card"><div class="row"><b>'+s.date+" at "+N(s.odo)+" "+U()+'</b><small>'+E(s.by)+"</small></div>"+(H.all&&v?'<small>'+E(vlabel(v))+"</small>":"")+
+items.map(i=>{p+=i.pc;l+=i.lc;n++;return '<div class="ln"><span><b>'+E(cname(i.c))+"</b> "+E(i.desc)+"<br><small>"+E(i.part)+"</small></span><span>"+$$(i.pc+i.lc)+"</span></div>"}).join("")+
+(s.notes?'<small>'+E(s.notes)+"</small>":"")+'<div class="row" style="margin-top:8px"><button class="sec" data-act="edit" data-id="'+s.id+'">Edit</button><button class="bad" data-act="del" data-id="'+s.id+'">Delete</button></div></div>'}).join("");
+el.innerHTML='<div class="row" style="margin-bottom:12px"><small>'+n+" lines. Parts "+$$(p)+", labor "+$$(l)+", total <b>"+$$(p+l)+'</b></small><button class="sec" data-act="exp">Export CSV</button></div>'+(body||empty("No matching entries."))}
+
+function vGarage(){
+const vs=S.v.map(x=>'<div class="item" data-act="vsel" data-id="'+x.id+'"><b>'+E(vlabel(x))+"</b><small>"+E([x.vin,x.plate].filter(Boolean).join(" / "))+"</small></div>").join("")||'<div class="mute">No vehicles yet.</div>';
+const F=FIELDS.map(([k,l])=>{const val=E(G.f[k]);const i=k==="drive"?'<select data-g="drive"><option></option>'+["FWD","RWD","AWD","4WD"].map(o=>"<option"+(G.f.drive===o?" selected":"")+">"+o+"</option>").join("")+"</select>":'<input data-g="'+k+'"'+(k==="pdate"?' type="date"':"")+(k==="year"||k==="po"?' inputmode="numeric"':"")+' value="'+val+'">';return"<label>"+l+i+"</label>"}).join("");
+const cs=S.c.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(c=>'<div class="item" data-act="csel" data-id="'+c.id+'"><b>'+E(c.name)+"</b><small>"+(c.mi||c.mo?"Every "+[c.mi?N(c.mi)+" "+U():"",c.mo?c.mo+" mo":""].filter(Boolean).join(" or "):"No interval")+"</small></div>").join("");
+return '<div class="card"><h3>Vehicles</h3>'+vs+"</div>"+
+'<div class="card"><h3>'+(G.id?"Edit vehicle":"Add a vehicle")+"</h3>"+F+'<div class="row"><button data-act="vsave">'+(G.id?"Save changes":"Add vehicle")+"</button>"+(G.id?'<button class="sec" data-act="vnew">Cancel</button><button class="bad" data-act="vdel">Delete</button>':"")+"</div></div>"+
+'<div class="card"><h3>Categories</h3>'+cs+"</div>"+
+'<div class="card"><h3>'+(C.id?"Edit category":"Add a category")+'</h3><label>Name<input data-cg="name" value="'+E(C.name)+'"></label><div class="g2"><label>Every ('+UL()+')<input inputmode="numeric" data-cg="mi" value="'+E(C.mi)+'"></label><label>Every (months)<input inputmode="numeric" data-cg="mo" value="'+E(C.mo)+'"></label></div><div class="row"><button data-act="csave">'+(C.id?"Save changes":"Add category")+"</button>"+(C.id?'<button class="sec" data-act="cnew">Cancel</button><button class="bad" data-act="cdel">Delete</button>':"")+"</div></div>"+
+'<div class="card"><h3>Distance unit</h3><div class="g2"><button class="'+(U()==="mi"?"":"sec")+'" data-act="unit" data-u="mi">Miles</button><button class="'+(U()==="km"?"":"sec")+'" data-act="unit" data-u="km">Kilometers</button></div><p class="mute">One unit for the whole app, covering odometers and service intervals. Switching asks whether to convert your existing numbers.</p></div>'+
+'<div class="card"><h3>Your data</h3><p class="mute">Everything is stored in this browser on this device only. Clearing site data erases it, and your phone and PC don’t sync. Back up regularly.</p><div class="row"><button data-act="backup">Back up</button><button class="sec" data-act="restore">Restore</button></div></div>'}
+
+/* ---------- render ---------- */
+function head(){const v=V();$("#hv").innerHTML=S.v.map(x=>'<option value="'+x.id+'"'+(v&&x.id===v.id?" selected":"")+">"+E(vlabel(x))+"</option>").join("")||"<option>No vehicles yet</option>";
+const[o,s]=odoInfo(v);$("#ho").value=o!=null?N(o):"";$("#ho").disabled=!v;$("#hs").textContent=s;$("#hun").textContent=U()}
+function render(){if(!S.v.find(x=>x.id===S.cur))S.cur=S.v[0]?S.v[0].id:null;head();
+document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.tab===tab));
+$("#m").innerHTML=({due:vDue,log:vLog,hist:vHist,garage:vGarage})[tab]();if(tab==="hist")fillHist()}
+
+/* ---------- actions ---------- */
+function addLine(){if(!D.cat){toast("Pick a category for this line.");return false}let pc,lc;try{pc=money(D.pc);lc=money(D.lc)}catch(e){toast("Costs must be numbers.");return false}
+D.lines.push({c:+D.cat,desc:D.desc.trim(),part:D.part.trim(),pc,lc});D.desc=D.part=D.pc=D.lc="";return true}
+const A={
+newcat(){D.nc=!D.nc;render()},
+addcat(){const n=D.ncn.trim(),mi=D.ncmi.trim(),mo=D.ncmo.trim();if(!n)return toast("Category needs a name.");
+if(S.c.some(c=>c.name.toLowerCase()===n.toLowerCase()))return toast("That category already exists.");
+if((mi&&!(+mi>0))||(mo&&!(+mo>0)))return toast("Intervals must be positive numbers, or blank.");
+const c={id:uid(),name:n,mi:mi?+mi:null,mo:mo?+mo:null};S.c.push(c);save();D.cat=String(c.id);D.nc=false;D.ncn=D.ncmi=D.ncmo="";render()},
+addline(){if(addLine())render()},
+rmline(d){D.lines.splice(+d.i,1);render()},
+clearlog(){resetLog();render()},
+async savelog(){const v=V();if(!D.date)return toast("Pick a date.");
+const odo=parseInt(String(D.odo).replace(/,/g,""),10);if(isNaN(odo)||odo<0)return toast("Odometer must be a whole number.");
+if(D.cat&&(D.desc.trim()||D.pc||D.lc)&&!addLine())return;
+if(!D.lines.length)return toast("Add at least one line item.");
+const w=odoWarn(v.id,D.date,odo,D.edit);if(w.length&&!await ask(w.join("\n\n"),"Save anyway"))return;
+const rec={id:D.edit||uid(),vid:v.id,date:D.date,odo,by:D.by.trim(),notes:D.notes.trim(),items:D.lines.map(l=>({...l}))};
+if(D.edit)S.s[S.s.findIndex(x=>x.id===D.edit)]=rec;else S.s.push(rec);
+save();resetLog();tab="hist";toast("Entry saved.");render()},
+edit(d){const s=S.s.find(x=>x.id===+d.id);if(!s)return;S.cur=s.vid;resetLog();Object.assign(D,{date:s.date,odo:String(s.odo),by:s.by||"",notes:s.notes||"",edit:s.id,lines:s.items.map(i=>({...i}))});tab="log";render();scrollTo(0,0)},
+async del(d){const s=S.s.find(x=>x.id===+d.id);if(s&&await ask("Delete the "+s.date+" entry ("+s.items.length+" lines)?","Delete")){S.s=S.s.filter(x=>x.id!==s.id);save();render()}},
+exp(){const r=[["Date","Vehicle","Odometer ("+U()+")","Category","Description","Part / Brand / Number","Parts Cost","Labor Cost","Line Total","Done By","Notes"]];
+for(const{s,items}of hrows()){const v=S.v.find(x=>x.id===s.vid);for(const i of items)r.push([s.date,v?vlabel(v):"",s.odo,cname(i.c),i.desc,i.part,i.pc,i.lc,Math.round((i.pc+i.lc)*100)/100,s.by,s.notes])}
+if(r.length<2)return toast("Nothing to export in this view.");
+saveFile("maintenance_history_"+today()+".csv","\ufeff"+r.map(x=>x.map(c=>{c=String(c??"");return/[",\n]/.test(c)?'"'+c.replace(/"/g,'""')+'"':c}).join(",")).join("\r\n"),"text/csv")},
+vsel(d){const x=S.v.find(v=>v.id===+d.id);G={id:x.id,f:{nick:x.nick,year:x.year,make:x.make,model:x.model,trim:x.trim,engine:x.engine,trans:x.trans,drive:x.drive,vin:x.vin,plate:x.plate,pdate:x.pdate,po:x.po,notes:x.notes}};render()},
+vnew(){G={id:null,f:{}};render()},
+vsave(){const f=G.f,t=k=>String(f[k]??"").trim(),year=parseInt(f.year,10),po=t("po").replace(/,/g,"");
+if(!t("make")||!t("model")||isNaN(year))return toast("Year, make, and model are required.");if(po&&isNaN(+po))return toast("Purchase odometer must be a whole number.");
+const o={id:G.id||uid(),year,make:t("make"),model:t("model"),nick:t("nick"),trim:t("trim"),engine:t("engine"),trans:t("trans"),drive:t("drive"),vin:t("vin"),plate:t("plate"),pdate:t("pdate"),notes:t("notes"),po:po?+po:null};
+if(G.id){const i=S.v.findIndex(x=>x.id===G.id);o.co=S.v[i].co;o.cd=S.v[i].cd;S.v[i]=o}else{S.v.push(o);S.cur=o.id}
+G={id:null,f:{}};save();resetLog();render();toast("Vehicle saved.")},
+async vdel(){const n=S.s.filter(s=>s.vid===G.id).length;if(!await ask("This permanently deletes the vehicle and its "+n+" service entries.","Delete"))return;
+S.v=S.v.filter(x=>x.id!==G.id);S.s=S.s.filter(s=>s.vid!==G.id);G={id:null,f:{}};save();resetLog();render()},
+csel(d){const c=S.c.find(x=>x.id===+d.id);C={id:c.id,name:c.name,mi:c.mi||"",mo:c.mo||""};render()},
+cnew(){C={id:null,name:"",mi:"",mo:""};render()},
+csave(){const n=C.name.trim(),mi=String(C.mi).trim(),mo=String(C.mo).trim();if(!n)return toast("Category needs a name.");
+if(S.c.some(c=>c.id!==C.id&&c.name.toLowerCase()===n.toLowerCase()))return toast("Another category already has that name.");
+if((mi&&!(+mi>0))||(mo&&!(+mo>0)))return toast("Intervals must be positive numbers, or blank.");
+const o={id:C.id||uid(),name:n,mi:mi?+mi:null,mo:mo?+mo:null};if(C.id)S.c[S.c.findIndex(c=>c.id===C.id)]=o;else S.c.push(o);
+C={id:null,name:"",mi:"",mo:""};save();render()},
+cdel(){if(S.s.some(s=>s.items.some(i=>i.c===C.id)))return toast("Logged entries use this category. Rename it instead.");
+S.c=S.c.filter(c=>c.id!==C.id);C={id:null,name:"",mi:"",mo:""};save();render()},
+backup(){saveFile("garage-log-backup-"+today()+".json",JSON.stringify(S),"application/json")},
+restore(){$("#rf").click()},
+async unit(d){const u=d.u;if(u===U())return;const f=u==="km"?1.609344:1/1.609344,nm=u==="km"?"kilometers":"miles";
+const r=await ask("Switch to "+nm+"?\n\nConvert converts your odometer readings and service intervals, rounded. Relabel only keeps the numbers and just changes the unit, for numbers you already entered in "+nm+".","Convert","Relabel only");if(!r)return;
+if(r===true){const c=n=>n==null?n:Math.round(n*f),ci=n=>n==null?n:Math.max(100,Math.round(n*f/100)*100);
+S.s.forEach(s=>s.odo=c(s.odo));S.v.forEach(v=>{v.po=c(v.po);v.co=c(v.co)});S.c.forEach(k=>k.mi=ci(k.mi))}
+S.u=u;save();resetLog();render();toast("Now using "+nm+".")}};
+
+async function saveFile(name,data,mime){try{if(DL){await DL.save({filename:name,data});return}
+const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([data],{type:mime}));a.download=name;document.body.append(a);a.click();a.remove()}catch(e){if(!e||e.code!=="declined")toast("Couldn’t save the file.")}}
+
+document.addEventListener("click",e=>{const b=e.target.closest("[data-act],[data-tab]");if(!b)return;
+if(b.dataset.tab){tab=b.dataset.tab;render();scrollTo(0,0);return}const f=A[b.dataset.act];if(f)f(b.dataset)});
+document.addEventListener("input",e=>{const t=e.target,d=t.dataset;
+if(d.k!==undefined)D[d.k]=t.value;else if(d.h!==undefined){H[d.h]=t.type==="checkbox"?t.checked:t.value;fillHist()}
+else if(d.g!==undefined)G.f[d.g]=t.value;else if(d.cg!==undefined)C[d.cg]=t.value});
+$("#hv").onchange=e=>{S.cur=+e.target.value;save();resetLog();render()};
+$("#ho").addEventListener("keydown",e=>{if(e.key==="Enter")$("#hu").click()});
+$("#hu").onclick=async()=>{const v=V();if(!v)return toast("Add a vehicle first.");const n=parseInt($("#ho").value.replace(/,/g,""),10);
+if(isNaN(n)||n<0)return toast("Odometer must be a whole number.");
+const cur=odoInfo(v)[0],mx=Math.max(0,...S.s.filter(s=>s.vid===v.id).map(s=>s.odo)),w=[];
+if(cur!=null&&n<cur)w.push("Current odometer is "+N(cur)+" "+U()+". "+N(n)+" is lower.");if(n<mx)w.push("You’ve logged a service at "+N(mx)+" "+U()+".");
+if(w.length&&!await ask(w.join("\n\n"),"Update anyway"))return render();
+v.co=n;v.cd=today();save();if(!D.edit&&!D.lines.length)resetLog();render();toast("Odometer updated.")};
+$("#rf").onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=async()=>{try{const o=JSON.parse(r.result);
+if(!Array.isArray(o.v)||!Array.isArray(o.c)||!Array.isArray(o.s))throw 0;
+if(!await ask("This replaces everything in the app with the backup ("+o.v.length+" vehicles, "+o.s.length+" entries).","Restore"))return;
+S=o;S.n=S.n||1000;S.u=S.u||"mi";save();resetLog();render();toast("Backup restored.")}catch(x){toast("That file isn’t a Garage Log backup.")}};r.readAsText(f);e.target.value=""};
+try{if(window.claude&&claude.use)claude.use("downloads").then(d=>DL=d).catch(()=>{})}catch(e){}
+setInterval(()=>{if(tab==="due"&&!document.querySelector(".ov"))render()},36e5);
+resetLog();render();
+})();
+</script>
+<script>
+if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
+</script>
+</body>
+</html>
